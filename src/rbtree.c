@@ -153,7 +153,7 @@ node_t *rbtree_insert(rbtree *t, const key_t key)
 node_t *rbtree_find(const rbtree *t, const key_t key)
 {
   node_t* temp = t->root;
-  // TODO: implement find
+  //21.12.06 completed: implement find
   while (temp != t->nil)
   {
     if (temp->key > key)
@@ -168,7 +168,7 @@ node_t *rbtree_find(const rbtree *t, const key_t key)
 
 node_t *rbtree_min(const rbtree *t)
 {
-  // TODO: implement find
+  // 21.12.06 completed: implement find
   node_t* temp_parent = t-> nil;
   node_t* temp_child = t->root;
 
@@ -182,7 +182,7 @@ node_t *rbtree_min(const rbtree *t)
 
 node_t *rbtree_max(const rbtree *t)
 {
-  // TODO: implement find
+  // 21.12.06 completed: implement find
   node_t* temp_parent = t->nil;
   node_t* temp_child = t-> root;
   while (temp_child != t->nil)
@@ -290,16 +290,11 @@ void rb_delete_fixup(rbtree* t, node_t* x)
 }
 int rbtree_erase(rbtree *t, node_t *z)
 {
-  // TODO: implement erase
+  // 21.12.06 completed: implement erase
   node_t* y = z; 
   node_t* x;
   color_t y_original_color = y->color;
-  // if (z->left == t->nil && z->right == t->nil)
-  // {
-  //   x = z->right;
-  //   rb_transplant(t, z, z->right);
-  //   y_original_color = RBTREE_RED;
-  // }
+
   if (z->left == t->nil)
   {  
     x = z->right;
