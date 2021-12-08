@@ -34,7 +34,6 @@ void test_insert_single(const key_t key) {
   assert(p->right == NULL);
   assert(p->parent == NULL);
 #endif
-
   delete_rbtree(t);
 }
 
@@ -132,7 +131,7 @@ void test_to_array(rbtree *t, const key_t *arr, const size_t n) {
   assert(t != NULL);
 
   insert_arr(t, arr, n);
-  qsort((void *)arr, n, sizeof(key_t), comp); //array sort
+  qsort((void *)arr, n, sizeof(key_t), comp);
 
   key_t *res = calloc(n, sizeof(key_t));
   rbtree_to_array(t, res, n);
@@ -141,7 +140,6 @@ void test_to_array(rbtree *t, const key_t *arr, const size_t n) {
   }
   free(res);
 }
-
 
 void test_multi_instance() {
   rbtree *t1 = new_rbtree();
@@ -164,17 +162,17 @@ void test_multi_instance() {
   for (int i = 0; i < n1; i++) {
     assert(arr1[i] == res1[i]);
   }
-  
+
   key_t *res2 = calloc(n2, sizeof(key_t));
   rbtree_to_array(t2, res2, n2);
   for (int i = 0; i < n2; i++) {
     assert(arr2[i] == res2[i]);
   }
 
+  free(res2);
+  free(res1);
   delete_rbtree(t2);
   delete_rbtree(t1);
-  free(res1);
-  free(res2);
 }
 
 // Search tree constraint
@@ -295,8 +293,7 @@ void test_duplicate_values() {
   test_rb_constraints(entries, n);
 }
 
-void 
-test_minmax_suite() {
+void test_minmax_suite() {
   key_t entries[] = {10, 5, 8, 34, 67, 23, 156, 24, 2, 12};
   const size_t n = sizeof(entries) / sizeof(entries[0]);
   test_minmax(entries, n);
@@ -305,11 +302,81 @@ test_minmax_suite() {
 void test_to_array_suite() {
   rbtree *t = new_rbtree();
   assert(t != NULL);
-  
+
   key_t entries[] = {10, 5, 8, 34, 67, 23, 156, 24, 2, 12, 24, 36, 990, 25};
   const size_t n = sizeof(entries) / sizeof(entries[0]);
   test_to_array(t, entries, n);
 
+  delete_rbtree(t);
+}
+void preorder(rbtree* tree, node_t *node){
+    // root - left - right
+    if (node == tree->nil) {
+        return ;
+    }
+
+    printf("%d ", node->key);
+    preorder(tree, node->left);
+    preorder(tree, node->right);
+}
+
+void test_find_erase(rbtree *t, const key_t *arr, const size_t n) {
+  for (int i = 0; i < n; i++) {
+    node_t *p = rbtree_insert(t, arr[i]);
+    assert(p != NULL);
+  }
+  // printf("%p\n", rbtree_find(t, 24));
+  for (int i = 0; i < n; i++) {
+    node_t *p = rbtree_find(t, arr[i]);
+    // printf("pre-order 결과:\n");
+    // preorder(t, t->root);
+    // printf("\n");
+    assert(p != NULL);
+    assert(p->key == arr[i]);
+    rbtree_erase(t, p);
+  }
+
+  for (int i = 0; i < n; i++) {
+    node_t *p = rbtree_find(t, arr[i]);
+    assert(p == NULL);
+  }
+
+  for (int i = 0; i < n; i++) {
+    node_t *p = rbtree_insert(t, arr[i]);
+    assert(p != NULL);
+    node_t *q = rbtree_find(t, arr[i]);
+    assert(q != NULL);
+    assert(q->key == arr[i]);
+    assert(p == q);
+    rbtree_erase(t, p);
+    q = rbtree_find(t, arr[i]);
+    assert(q == NULL);
+  }
+}
+
+void test_find_erase_fixed() {
+  const key_t arr[] = {10, 5, 8, 34, 67, 23, 156, 24, 2, 12, 24, 36, 990, 25};
+  const size_t n = sizeof(arr) / sizeof(arr[0]);
+  rbtree *t = new_rbtree();
+  assert(t != NULL);
+
+  test_find_erase(t, arr, n);
+
+  delete_rbtree(t);
+}
+
+void test_find_erase_rand(const size_t n, const unsigned int seed) {
+  srand(seed);
+  rbtree *t = new_rbtree();
+  key_t *arr = calloc(n, sizeof(key_t));
+  for (int i = 0; i < n; i++) {
+    arr[i] = rand();
+    // printf("%d\n", arr[i]);
+  }
+
+  test_find_erase(t, arr, n);
+
+  free(arr);
   delete_rbtree(t);
 }
 
@@ -318,10 +385,12 @@ int main(void) {
   // test_insert_single(1024);
   // test_find_single(512, 1024);
   // test_erase_root(128);
-  test_minmax_suite();
+  // test_find_erase_fixed();
+  // test_minmax_suite();
   // test_to_array_suite();
   // test_distinct_values();
   // test_duplicate_values();
   // test_multi_instance();
+  test_find_erase_rand(1000000, 17);
   printf("Passed all tests!\n");
 }
