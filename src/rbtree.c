@@ -4,12 +4,12 @@
 
 rbtree *new_rbtree(void)
 {
-  // 21.12.06 completed: initialize struct if needed
+  // 21.12.06: completed: initialize struct if needed
   rbtree *p = (rbtree *)calloc(1, sizeof(rbtree));
   node_t *NIL = (node_t *)calloc(1, sizeof(node_t));
-  NIL->color = RBTREE_BLACK;
-  p->nil = NIL;
-  p->root = NIL;
+  NIL->color = RBTREE_BLACK;  // 초기값 (property 3)
+  p->nil = NIL;   // 초기값
+  p->root = NIL;  // 초기값
   return p;
 }
 
@@ -26,7 +26,7 @@ void delete_node(rbtree* t, node_t* n)
 
 void delete_rbtree(rbtree *t)
 {
-  // TODO: reclaim the tree nodes's memory
+  // 21.12.06: reclaim the tree nodes's memory
   delete_node(t, t->root);
   free(t->nil);
   free(t);
@@ -34,6 +34,7 @@ void delete_rbtree(rbtree *t)
 
 void left_rotate(rbtree *t, node_t *x)
 {
+  // x->right가 nil이 아니라는 가정하에 함수 진행 -> x-> right이 없다면 
   node_t *y = x->right;
   x->right = y->left;
   if (y->left != t->nil)
@@ -221,7 +222,7 @@ node_t* tree_minimum(rbtree* t, node_t* z)
 void rb_delete_fixup(rbtree* t, node_t* x)
 {
   node_t* w;
-  while (x!= t->nil && x != t->root && x->color == RBTREE_BLACK)
+  while (x != t->root && x->color == RBTREE_BLACK)
   {
     if (x == x->parent->left)
     {
@@ -295,17 +296,18 @@ int rbtree_erase(rbtree *t, node_t *z)
   node_t* x;
   color_t y_original_color = y->color;
 
-  if (z->left == t->nil)
-  {  
-    x = z->right;
-    rb_transplant(t, z, z->right);
-  }
-  else if (z->right == t->nil) 
+  if (z->right == t->nil) 
   {
     x = z->left;
     rb_transplant(t, z, z->left);
   }
-  
+
+  else if (z->left == t->nil)
+  {  
+    x = z->right;
+    rb_transplant(t, z, z->right);
+  }
+
   else
   {
     y = tree_minimum(t, z->right);
@@ -324,7 +326,7 @@ int rbtree_erase(rbtree *t, node_t *z)
     y->left->parent = y;
     y->color = z->color;
   }
-  if (y_original_color == RBTREE_BLACK);
+  if (y_original_color == RBTREE_BLACK)
     rb_delete_fixup(t, x);
   free(z);
 }
