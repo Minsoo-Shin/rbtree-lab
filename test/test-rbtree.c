@@ -328,9 +328,7 @@ void test_find_erase(rbtree *t, const key_t *arr, const size_t n) {
   // printf("%p\n", rbtree_find(t, 24));
   for (int i = 0; i < n; i++) {
     node_t *p = rbtree_find(t, arr[i]);
-    // printf("pre-order 결과:\n");
-    // preorder(t, t->root);
-    // printf("\n");
+
     assert(p != NULL);
     assert(p->key == arr[i]);
     rbtree_erase(t, p);

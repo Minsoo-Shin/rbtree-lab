@@ -8,7 +8,7 @@
             "name": "(gdb) 시작",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/rbtree",
+            "program": "${workspaceFolder}/${fileBasenameNoExtension}",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

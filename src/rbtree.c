@@ -13,15 +13,7 @@ rbtree *new_rbtree(void)
   return p;
 }
 
-void delete_node(rbtree* t, node_t* n)
-{// 후위순회를 하면서 root를 마지막에 할당을 반환한다. 
-  if (n == t->nil){
-    return;
-  }
-  delete_node(t, n->left);
-  delete_node(t, n->right);
-  free(n);
-}
+void delete_node(rbtree* t, node_t* n);
 
 void delete_rbtree(rbtree *t)
 { // 21.12.06: reclaim the tree nodes's memory
@@ -31,56 +23,9 @@ void delete_rbtree(rbtree *t)
   free(t);
 }
 
-void left_rotate(rbtree *t, node_t *x)
-{
-  // x->right가 nil이 아니라는 가정 하에 함수 진행
-  // x-> right이 없다면 
-  // x : rotate를 하는 축
-  // y : x 의 오른쪽 자식
-  /*
-       x
-     /   \
-   x.l    y
-        /   \
-      y.l   y.r
-  */
 
-  node_t *y = x->right;
-  x->right = y->left;  // x, y.l 연결
-
-  if (y->left != t->nil)
-    y->left->parent = x; // x, y.l 연결
-
-  y->parent = x->parent; // x.p, y.p 대체하기
-  if (x->parent == t->nil) // x가 root 인 경우
-    t->root = y;
-  else if (x == x->parent->left) // x가 왼쪽 자식인 경우
-    x->parent->left = y;
-  else   // x가 오른쪽 자식인 경우
-    x->parent->right = y;
-  y->left = x;  // y 왼쪽 자식에 x 연결해주기
-  x->parent = y; // y 왼쪽 자식에 x 연결해주기
-}
-
-void right_rotate(rbtree *t, node_t *x)  // left_rotate와 동일
-{
-  node_t *y = x->left;
-  x->left = y->right;
-  if (y->right != t->nil)
-    y->right->parent = x;
-
-  y->parent = x->parent;
-  if (x->parent == t->nil)
-    t->root = y;
-  else if (x == x->parent->right)
-    x->parent->right = y;
-  else
-    x->parent->left = y;
-  y->right = x;
-  x->parent = y;
-}
-
-
+void left_rotate(rbtree *t, node_t *x);
+void right_rotate(rbtree *t, node_t *x);
 
 void rbtree_insert_fixup(rbtree *t, node_t *z)
 { // 새 노드는 무조건 Red, 부모까지 Red이면 Fix-up 
@@ -88,7 +33,7 @@ void rbtree_insert_fixup(rbtree *t, node_t *z)
   {
     if (z->parent == z->parent->parent->left)
     {
-      node_t *uncle = z->parent->parent->right; //y = uncle을 의미함
+      node_t *uncle = z->parent->parent->right;
       if (uncle->color == RBTREE_RED)
       {
         z->parent->color = RBTREE_BLACK;
@@ -110,7 +55,7 @@ void rbtree_insert_fixup(rbtree *t, node_t *z)
     }
     else //z->parent == z->parent->parent->right
     {
-      node_t *uncle = z->parent->parent->left; //y = uncle을 의미함
+      node_t *uncle = z->parent->parent->left;
       if (uncle->color == RBTREE_RED)
       {
         z->parent->color = RBTREE_BLACK;
@@ -185,65 +130,10 @@ node_t *rbtree_find(const rbtree *t, const key_t key)
   return NULL;
 }
 
-node_t *rbtree_min(const rbtree *t)
-{
-  // 21.12.06 completed: implement find
-  node_t* temp_parent = t-> nil;
-  node_t* temp_child = t->root;
-  while (temp_child != t->nil)
-  {
-    temp_parent = temp_child;
-    temp_child = temp_child->left;
-  }
-  return temp_parent;
-}
-
-node_t *rbtree_max(const rbtree *t)
-{
-  // 21.12.06 completed: implement find
-  node_t* temp_parent = t->nil;
-  node_t* temp_child = t-> root;
-  while (temp_child != t->nil)
-  {
-    temp_parent = temp_child;
-    temp_child = temp_child->right;
-  }  
-  return temp_parent;
-}
-
-void rb_transplant(rbtree* t, node_t* u, node_t* v)
-{
-  if (u->parent == t->nil)
-    t->root = v;
-  else if (u == u->parent->left) 
-    u->parent->left = v;
-  else
-    u->parent->right = v;
-  v->parent = u->parent;
-}
-
-// node_t* tree_minimum(rbtree* t, node_t* z)
-// {
-//   node_t* temp_parent;
-//   node_t* temp_child = z;
-
-//   while (temp_child != t->nil)
-//   {
-//     temp_parent = temp_child;
-//     temp_child = temp_child->left;
-//   }
-//   return temp_parent;
-// }
-
-node_t *tree_minimum(const rbtree *t, node_t *n) {
-  // TODO: implement find
-  node_t *ptr;
-  ptr = n;
-  while(ptr ->left != t->nil){
-    ptr = ptr->left;
-  }
-  return ptr;
-}
+node_t *rbtree_min(const rbtree *t);
+node_t *rbtree_max(const rbtree *t);
+void rb_transplant(rbtree* t, node_t* u, node_t* v);
+node_t* tree_minimum(rbtree* t, node_t* z);
 
 void rb_delete_fixup(rbtree* t, node_t* x)
 {
@@ -373,4 +263,116 @@ int rbtree_to_array(const rbtree *t, key_t *arr, const size_t n)
   // 21.12.06 completed: implement to_array
   node_to_array(t, t->root, arr, 0);
   return 0;
+}
+
+
+
+///////////////// 유틸 함수///////////////////////
+void delete_node(rbtree* t, node_t* n)
+{// 후위순회를 하면서 root를 마지막에 할당을 반환한다. 
+  if (n == t->nil)
+    return;
+  delete_node(t, n->left);
+  delete_node(t, n->right);
+  free(n);
+}
+
+void left_rotate(rbtree *t, node_t *x)
+{
+  // x->right가 nil이 아니라는 가정 하에 함수 진행
+  // x-> right이 없다면 
+  // x : rotate를 하는 축
+  // y : x 의 오른쪽 자식
+  /*
+       x
+     /   \
+   x.l    y
+        /   \
+      y.l   y.r
+  */
+
+  node_t *y = x->right;
+  x->right = y->left;  // x, y.l 연결
+
+  if (y->left != t->nil)
+    y->left->parent = x; // x, y.l 연결
+
+  y->parent = x->parent; // x.p, y.p 대체하기
+  if (x->parent == t->nil) // x가 root 인 경우
+    t->root = y;
+  else if (x == x->parent->left) // x가 왼쪽 자식인 경우
+    x->parent->left = y;
+  else   // x가 오른쪽 자식인 경우
+    x->parent->right = y;
+  y->left = x;  // y 왼쪽 자식에 x 연결해주기
+  x->parent = y; // y 왼쪽 자식에 x 연결해주기
+}
+
+
+void right_rotate(rbtree *t, node_t *x)  // left_rotate와 동일
+{
+  node_t *y = x->left;
+  x->left = y->right;
+  if (y->right != t->nil)
+    y->right->parent = x;
+
+  y->parent = x->parent;
+  if (x->parent == t->nil)
+    t->root = y;
+  else if (x == x->parent->right)
+    x->parent->right = y;
+  else
+    x->parent->left = y;
+  y->right = x;
+  x->parent = y;
+}
+
+node_t *rbtree_min(const rbtree *t)
+{
+  // 21.12.06 completed: implement find
+  node_t* temp_parent = t-> nil;
+  node_t* temp_child = t->root;
+  while (temp_child != t->nil)
+  {
+    temp_parent = temp_child;
+    temp_child = temp_child->left;
+  }
+  return temp_parent;
+}
+
+node_t *rbtree_max(const rbtree *t)
+{
+  // 21.12.06 completed: implement find
+  node_t* temp_parent = t->nil;
+  node_t* temp_child = t-> root;
+  while (temp_child != t->nil)
+  {
+    temp_parent = temp_child;
+    temp_child = temp_child->right;
+  }  
+  return temp_parent;
+}
+
+void rb_transplant(rbtree* t, node_t* u, node_t* v)
+{
+  if (u->parent == t->nil)
+    t->root = v;
+  else if (u == u->parent->left) 
+    u->parent->left = v;
+  else
+    u->parent->right = v;
+  v->parent = u->parent;
+}
+
+node_t* tree_minimum(rbtree* t, node_t* z)
+{
+  node_t* temp_parent = t->nil;
+  node_t* temp_child = z;
+
+  while (temp_child != t->nil)
+  {
+    temp_parent = temp_child;
+    temp_child = temp_child->left;
+  }
+  return temp_parent;
 }
